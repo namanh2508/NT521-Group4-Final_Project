@@ -24,14 +24,14 @@ FG_CODEBERT_OUTPUT_DIR = './fg_codebert_model'
 CONFIG = {
     'max_length': 128,
     'mlm_probability': 0.15,
-    'num_train_epochs': 5,
-    'per_device_train_batch_size': 8,      # Tùy chỉnh theo VRAM. Nếu VRAM < 12GB, giảm xuống 4.
-    'gradient_accumulation_steps': 2,         # Giả lập batch size = 8 * 2 = 16. Rất hữu ích khi VRAM hạn chế.
+    'num_train_epochs': 3,
+    'per_device_train_batch_size': 32,      # Tùy chỉnh theo VRAM. Nếu VRAM < 12GB, giảm xuống 4.
+    'gradient_accumulation_steps': 1,         # Giả lập batch size = 8 * 2 = 16. Rất hữu ích khi VRAM hạn chế.
     'learning_rate': 4e-5,
     'weight_decay': 0.01,
-    'save_steps': 5_000,
+    'save_steps': 5000,
     'save_total_limit': 2,
-    'logging_steps': 500,
+    'logging_steps': 1000,
     'logging_dir': './logs/tapt',
     'fp16': True,                              # BẮT mixed precision để tăng tốc độ và tiết kiệm VRAM
     'dataloader_pin_memory': True,              # Tăng tốc độ truyền dữ liệu
@@ -42,7 +42,7 @@ CONFIG = {
 def load_and_preprocess_exploit_data(base_path):
     """
     Tải và tiền xử lý dữ liệu từ các file CSV.
-    CHỈ SỬ DỮ LIỆU DỮ LIỆU 'train.csv' cho việc huấn luyện TAPT.
+    Đọc thẳng các cột đã được tiền xử lý sẵn (temp_nl, temp_code) để tăng tốc độ.
     Trả về một list các chuỗi văn bản đã được ghép nối.
     """
     all_texts = []
@@ -58,22 +58,22 @@ def load_and_preprocess_exploit_data(base_path):
             print(f"Cảnh báo: Không tìm thấy file huấn luyện cho {language} tại {train_path}. Bỏ qua.")
             continue
         
-        print(f"Đang tải và tiền xử lý dữ liệu cho {language} từ: {train_path}")
+        print(f"Đang tải và xử lý dữ liệu cho {language} từ: {train_path}")
         df = pd.read_csv(train_path)
         
-        # Sử dụng itertuples() để duyệt DataFrame nhanh hơn nhiều so với iterrows()
+        # Sử dụng itertuples() để duyệt DataFrame nhanh hơn nhiều
         for row in tqdm(df.itertuples(index=False, name='PandasRow'), total=len(df), desc=f"Xử lý {language}"):
-            nl, code = row.nl, row.code
-            
-            # Áp dụng Template Parser
-            template_nl, _ = apply_template_parser(nl)
-            template_code, _ = apply_template_parser(code)
+            # Đọc thẳng từ các cột có sẵn trong file CSV
+            raw_nl = row.raw_nl
+            raw_code = row.raw_code
+            template_nl = row.temp_nl
+            template_code = row.temp_code
             
             # Tạo 3 cặp NL-Code theo mô tả trong bài báo
             # 1. raw NL ⊕ raw code
-            all_texts.append(f"{nl} {tokenizer.sep_token} {code}")
+            all_texts.append(f"{raw_nl} {tokenizer.sep_token} {raw_code}")
             # 2. raw NL ⊕ template-argument code
-            all_texts.append(f"{nl} {tokenizer.sep_token} {template_code}")
+            all_texts.append(f"{raw_nl} {tokenizer.sep_token} {template_code}")
             # 3. template-argument NL ⊕ template-argument code
             all_texts.append(f"{template_nl} {tokenizer.sep_token} {template_code}")
             
