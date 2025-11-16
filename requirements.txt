@@ -1,4 +1,4 @@
-torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
 transformers
 spacy
 nltk
@@ -9,4 +9,3 @@ sentencepiece
 scikit-learn
 datasets
 transformers[torch]
-python -m spacy download en_core_web_sm
