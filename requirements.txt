@@ -1,0 +1,10 @@
+torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+transformers
+spacy
+nltk
+rouge-score
+easy-rouge
+pandas
+sentencepiece
+scikit-learn
+python -m spacy download en_core_web_sm
