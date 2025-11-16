@@ -10,3 +10,4 @@ scikit-learn
 datasets
 transformers[torch]
 protobuf
+tensorboard
