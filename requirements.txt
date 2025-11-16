@@ -9,4 +9,3 @@ sentencepiece
 scikit-learn
 datasets
 transformers[torch]
-protobuf
