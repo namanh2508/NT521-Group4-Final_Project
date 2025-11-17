@@ -2,26 +2,31 @@ import torch
 import torch.nn as nn
 from transformers import RobertaModel, RobertaPreTrainedModel
 from config import MODEL_CONFIG
-
+from transformers import GenerationMixin
+# --- Semantic Attention Layer ---
 class SemanticAttention(nn.Module):
-    """Lớp Chú ý Ngữ nghĩa để kết hợp thông tin từ nhiều lớp của CodeBERT."""
     def __init__(self, hidden_size):
         super().__init__()
         self.fc = nn.Linear(hidden_size, hidden_size)
         self.tanh = nn.Tanh()
 
-    def forward(self, all_layer_outputs):
-        # all_layer_outputs: [batch_size, num_layers, seq_len, hidden_size]
+    def forward(self, all_layer_outputs): # all_layer_outputs: [batch_size, num_layers, seq_len, hidden_size]
         u = self.tanh(self.fc(all_layer_outputs))
         
-        # Tính attention score với vector trung bình của u làm context
-        uj = u.mean(dim=1, keepdim=True)
-        scores = torch.matmul(u, uj.transpose(-2, -1)).squeeze(-1)
-        alphas = torch.softmax(scores, dim=1)
+        # Tính vector ngữ cảnh uj bằng cách lấy trung bình trên chiều num_layers
+        uj = u.mean(dim=1, keepdim=True) # [batch_size, 1, seq_len, hidden_size]
+        
+        # --- SỬA DÒNG QUAN TRỌNG ---
+        # Thay thế dòng matmul bằng phép nhân vô hướng trên chiều cuối cùng
+        # (u * uj) sẽ thực hiện nhân từng phần tử, sau đó .sum(-1) tính tổng để có dot product
+        scores = (u * uj).sum(-1) # Kết quả: [batch_size, num_layers, seq_len]
+        
+        alphas = torch.softmax(scores, dim=1) # [batch_size, num_layers, seq_len]
+        
+        alphas_expanded = alphas.unsqueeze(-1) # [batch_size, num_layers, seq_len, 1]
         
         # Tính weighted sum
-        alphas_expanded = alphas.unsqueeze(-1)
-        weighted_sum = torch.sum(alphas_expanded * all_layer_outputs, dim=1)
+        weighted_sum = torch.sum(alphas_expanded * all_layer_outputs, dim=1) # [batch_size, seq_len, hidden_size]
         return weighted_sum
 
 class FusionLayer(nn.Module):
@@ -50,7 +55,7 @@ class FusionLayer(nn.Module):
         C_bar = G + C_raw_norm
         return C_bar
 
-class ExploitGen(RobertaPreTrainedModel):
+class ExploitGen(RobertaPreTrainedModel, GenerationMixin):
     """Mô hình ExploitGen chính."""
     def __init__(self, config):
         super().__init__(config)
