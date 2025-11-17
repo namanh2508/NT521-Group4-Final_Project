@@ -17,39 +17,39 @@ class ExploitGenDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-    item = self.data[idx]
-    
-    # TRỰC TIỆP: Đọc thẳng các giá trị đã được tiền xử lý từ CSV
-    raw_nl = item['raw_nl']
-    template_nl = item['temp_nl']
-    template_code = item['temp_code']
-    
-    # Tokenize và padding
-    raw_encodings = self.tokenizer(
-        raw_nl, 
-        truncation=True, 
-        padding='max_length', 
-        max_length=self.max_len
-    )
-    temp_encodings = self.tokenizer(
-        template_nl, 
-        truncation=True, 
-        padding='max_length', 
-        max_length=self.max_len
-    )
-    code_encodings = self.tokenizer(
-        template_code, 
-        truncation=True, 
-        padding='max_length', 
-        max_length=self.max_len
-    )
-    
-    return {
-        'raw_input_ids': torch.tensor(raw_encodings['input_ids']),
-        'temp_input_ids': torch.tensor(temp_encodings['input_ids']),
-        'attention_mask': torch.tensor(raw_encodings['attention_mask']),
-        'labels': torch.tensor(code_encodings['input_ids'])
-    }
+        item = self.data[idx]
+        
+        # TRỰC TIỆP: Đọc thẳng các giá trị đã được tiền xử lý từ CSV
+        raw_nl = item['raw_nl']
+        template_nl = item['temp_nl']
+        template_code = item['temp_code']
+        
+        # Tokenize và padding
+        raw_encodings = self.tokenizer(
+            raw_nl, 
+            truncation=True, 
+            padding='max_length', 
+            max_length=self.max_len
+        )
+        temp_encodings = self.tokenizer(
+            template_nl, 
+            truncation=True, 
+            padding='max_length', 
+            max_length=self.max_len
+        )
+        code_encodings = self.tokenizer(
+            template_code, 
+            truncation=True, 
+            padding='max_length', 
+            max_length=self.max_len
+        )
+        
+        return {
+            'raw_input_ids': torch.tensor(raw_encodings['input_ids']),
+            'temp_input_ids': torch.tensor(temp_encodings['input_ids']),
+            'attention_mask': torch.tensor(raw_encodings['attention_mask']),
+            'labels': torch.tensor(code_encodings['input_ids'])
+        }
 
 def main():
     # 1. Tải dữ liệu
