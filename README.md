@@ -107,8 +107,8 @@ ExploitGen/
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/NTDXYG/ExploitGen.git
-cd ExploitGen
+git clone https://github.com/namanh2508/NT521-Group4-Final_Project.git
+cd NT521-Group4-Final_Project
 ```
 
 2. Create a virtual environment (recommended):
