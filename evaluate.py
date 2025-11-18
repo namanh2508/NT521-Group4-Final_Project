@@ -86,10 +86,10 @@ def main():
     print(f"Generated Code: {generated_code}")
 
     # 3. Đánh giá trên tập test
-    # python_data = load_data_from_csv(DATA_BASE_PATH, 'python')
-    # test_dataset = ExploitGenDataset(python_data['test'], tokenizer, TRAINING_CONFIG['max_length'])
-    # test_dataloader = DataLoader(test_dataset, batch_size=TRAINING_CONFIG['batch_size'])
-    # evaluate_model(model, test_dataloader, tokenizer, device)
+    python_data = load_data_from_csv(DATA_BASE_PATH, 'python')
+    test_dataset = ExploitGenDataset(python_data['test'], tokenizer, TRAINING_CONFIG['max_length'])
+    test_dataloader = DataLoader(test_dataset, batch_size=TRAINING_CONFIG['batch_size'])
+    evaluate_model(model, test_dataloader, tokenizer, device)
 
 if __name__ == '__main__':
     main()
