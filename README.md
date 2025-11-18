@@ -6,6 +6,7 @@ This project implements the ExploitGen model described in the paper "ExploitGen:
 
 ## Table of Contents
 - [Project Overview](#project-overview)
+- [Directory Structure](#directory-structure)
 - [Installation](#installation)
 - [Data Preparation](#data-preparation)
 - [Training Process](#training-process)
