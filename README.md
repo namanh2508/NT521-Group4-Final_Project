@@ -141,7 +141,7 @@ mkdir -p data/assembly
 
 2. Download and prepare the SPoC dataset for DAPT:
 
-   - Download the SPoC dataset from the official source ( https://sumith1896.github.io/spoc/data/spoc.git )
+   - Download the SPoC dataset from the official source ( https://sumith1896.github.io/spoc/data/spoc.zip )
    - Extract and place `spoc-train.tsv` in the `data/spoc/` directory
 
 3. Prepare the exploit code datasets:
