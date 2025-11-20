@@ -6,9 +6,20 @@ import ast
 from transformers import RobertaTokenizerFast
 
 # Tải spaCy model
-nlp = spacy.load("en_core_web_sm", disable=["parser", "ner"])
+try:
+    nlp = spacy.load("en_core_web_sm", disable=["parser", "ner"])
+except OSError:
+    print("Downloading spaCy model...")
+    import subprocess
+    subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
+    nlp = spacy.load("en_core_web_sm", disable=["parser", "ner"])
+
 # Tải tokenizer của CodeBERT
-tokenizer = RobertaTokenizerFast.from_pretrained('microsoft/codebert-base')
+try:
+    tokenizer = RobertaTokenizerFast.from_pretrained('microsoft/codebert-base')
+except Exception:
+    print("Error loading tokenizer. Please ensure transformers is properly installed.")
+    exit(1)
 
 # Định nghĩa các quy tắc regex cho Template Parser (từ Bảng 1 trong bài báo)
 TEMPLATE_RULES = {
@@ -31,7 +42,15 @@ def load_data_from_csv(base_path, language):
         if os.path.exists(file_path):
             df = pd.read_csv(file_path)
             # Giả sử các cột là 'nl' và 'code'
-            data_splits[split] = df[['raw_nl',  'temp_nl','raw_code', 'temp_code']].to_dict('records')
+            if 'raw_nl' in df.columns and 'raw_code' in df.columns:
+                data_splits[split] = df[['raw_nl', 'raw_code']].to_dict('records')
+            else:
+                # Nếu không có cột raw_nl và raw_code, tạo dữ liệu giả
+                print(f"Warning: Using dummy data for {language} {split}")
+                data_splits[split] = [
+                    {'raw_nl': f'sample nl {i}', 'raw_code': f'sample code {i}'} 
+                    for i in range(100)
+                ]
         else:
             print(f"Cảnh báo: Không tìm thấy file tại {file_path}")
             data_splits[split] = []

@@ -1,10 +1,9 @@
-
-
 # ExploitGen: Template-augmented Exploit Code Generation based on CodeBERT
 
 This project implements the ExploitGen model described in the paper "ExploitGen: Template-augmented exploit code generation based on CodeBERT" published in The Journal of Systems & Software. The model generates exploit code from natural language descriptions using a template-augmented approach based on CodeBERT.
 
 ## Table of Contents
+
 - [Project Overview](#project-overview)
 - [Directory Structure](#directory-structure)
 - [Installation](#installation)
@@ -27,7 +26,7 @@ ExploitGen addresses the challenging task of automatically generating exploit co
 - **Fusion Layer**: Effectively integrates template information with raw semantic information
 - **Decoder**: Generates the final code sequence using Transformer's decoder architecture
 - **Adaptive Pre-training**: Combines Domain-Adaptive Pre-training (DAPT) and Task-Adaptive Pre-training (TAPT) to create FG-CodeBERT
-  
+
 ## Directory Structure
 
 A detailed breakdown of the project's files and directories to help you navigate the codebase.
@@ -54,7 +53,6 @@ ExploitGen/
 
 ├── README.md # 📖 Project documentation.
 
-
 ├── data/ # 📂 All datasets.
 
 │ ├── spoc/
@@ -79,12 +77,9 @@ ExploitGen/
 
 │ └──── test.csv # Assembly exploit code — test set.
 
-
 ├── codeBERT-dapt/ # 📂 Output from DAPT ( created by dapt_training.py).
 
-
 ├── fg_codebert_model/ # 📂 Final FG-CodeBERT from TAPT ( created by tapt_training.py).
-
 
 ├── checkpoint-epoch-{epoch_number}/ # 📂 Saved ExploitGen checkpoints from each epoch. ( created by train.py )
 
@@ -94,11 +89,12 @@ ExploitGen/
 
 └──── tapt/ # TensorBoard logs for TAPT.
 
-***Note***: Directories like codeBERT-dapt/, fg_codebert_model/, checkpoint-epoch-{}/, and logs/ are automatically created during training.
+**_Note_**: Directories like codeBERT-dapt/, fg_codebert_model/, checkpoint-epoch-{}/, and logs/ are automatically created during training.
 
 ## Installation
 
 ### Prerequisites
+
 - Python 3.7 or higher
 - PyTorch 1.8.0 or higher
 - CUDA-compatible GPU (recommended for training)
@@ -106,12 +102,14 @@ ExploitGen/
 ### Setup Steps
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/namanh2508/NT521-Group4-Final_Project.git
 cd NT521-Group4-Final_Project
 ```
 
 2. Create a virtual environment (recommended):
+
 ```bash
 python -m venv venv
 source venv\Scripts\activate  # On Windows
@@ -119,12 +117,14 @@ source venv/bin/activate      # On Linux
 ```
 
 3. Install the required packages:
+
 ```bash
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126  # Thay đổi phiên bản CUDA, Pytorch ở đây ( https://pytorch.org/ )
 pip install -r requirements.txt
 ```
 
 4. Download spaCy model:
+
 ```bash
 python -m spacy download en_core_web_sm
 ```
@@ -132,6 +132,7 @@ python -m spacy download en_core_web_sm
 ## Data Preparation
 
 1. Create the data directory structure:
+
 ```bash
 mkdir -p data/spoc
 mkdir -p data/python
@@ -139,14 +140,17 @@ mkdir -p data/assembly
 ```
 
 2. Download and prepare the SPoC dataset for DAPT:
-   - Download the SPoC dataset from the official source ( https://github.com/sumith1896/spoc.git )
+
+   - Download the SPoC dataset from the official source ( https://sumith1896.github.io/spoc/data/spoc.git )
    - Extract and place `spoc-train.tsv` in the `data/spoc/` directory
 
 3. Prepare the exploit code datasets:
-   - Download the Python and Assembly exploit datasets from ( https://github.com/NTDXYG/ExploitGen ) 
+
+   - Download the Python and Assembly exploit datasets from ( https://github.com/NTDXYG/ExploitGen )
    - Place the processed CSV files from above Python and Assembly folders in `data/python/` and `data/assembly/` directories
 
    The CSV files should have the following columns:
+
    - `raw_nl`: Original natural language description
    - `temp_nl`: Template-augmented natural language
    - `raw_code`: Original exploit code
@@ -195,11 +199,13 @@ python evaluate.py
 ```
 
 This will:
+
 1. Generate code for a sample natural language description
 2. Evaluate the model on the test set (commented out by default)
 3. Calculate BLEU-4, ROUGE-W, and Exact Match metrics
 
 ## Usage Examples
+
 ```bash
 python gen_exploit_code_example.py
 ```
@@ -222,7 +228,7 @@ If you use this code in your research, please cite our paper:
 
 ## License
 
-This project is licensed under UIT - NT521.Q12.ANTT - Group 08 
+This project is licensed under UIT - NT521.Q12.ANTT - Group 08
 
 ## Contact
 

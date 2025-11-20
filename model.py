@@ -3,6 +3,7 @@ import torch.nn as nn
 from transformers import RobertaModel, RobertaPreTrainedModel
 from config import MODEL_CONFIG
 from transformers import GenerationMixin
+
 # --- Semantic Attention Layer ---
 class SemanticAttention(nn.Module):
     def __init__(self, hidden_size):
@@ -16,9 +17,7 @@ class SemanticAttention(nn.Module):
         # Tính vector ngữ cảnh uj bằng cách lấy trung bình trên chiều num_layers
         uj = u.mean(dim=1, keepdim=True) # [batch_size, 1, seq_len, hidden_size]
         
-        # --- SỬA DÒNG QUAN TRỌNG ---
-        # Thay thế dòng matmul bằng phép nhân vô hướng trên chiều cuối cùng
-        # (u * uj) sẽ thực hiện nhân từng phần tử, sau đó .sum(-1) tính tổng để có dot product
+        # Tính điểm chú ý
         scores = (u * uj).sum(-1) # Kết quả: [batch_size, num_layers, seq_len]
         
         alphas = torch.softmax(scores, dim=1) # [batch_size, num_layers, seq_len]
@@ -82,9 +81,17 @@ class ExploitGen(RobertaPreTrainedModel, GenerationMixin):
         self,
         raw_input_ids=None,
         temp_input_ids=None,
+        input_ids=None,  # Thêm tham số này để tương thích với hàm generate
         attention_mask=None,
         labels=None,
+        output_hidden_states=None,
+        return_dict=None,
     ):
+        # Nếu chỉ có input_ids, sử dụng nó cho cả hai encoder
+        if input_ids is not None and raw_input_ids is None and temp_input_ids is None:
+            raw_input_ids = input_ids
+            temp_input_ids = input_input_ids
+            
         # 1. Encoder
         raw_outputs = self.raw_encoder(
             input_ids=raw_input_ids, 
@@ -120,5 +127,10 @@ class ExploitGen(RobertaPreTrainedModel, GenerationMixin):
         return {'loss': loss, 'logits': logits}
 
     def prepare_inputs_for_generation(self, input_ids, **kwargs):
-        # Cần chuẩn bị đầu vào cho hàm generate
-        return {"input_ids": input_ids}
+        # Chuẩn bị đầu vào cho hàm generate
+        # Sử dụng input_ids cho cả raw và temp encoder
+        return {
+            "raw_input_ids": input_ids,
+            "temp_input_ids": input_ids,
+            **kwargs
+        }

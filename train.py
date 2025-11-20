@@ -8,47 +8,55 @@ from model import ExploitGen
 from transformers import RobertaConfig
 
 class ExploitGenDataset(Dataset):
-    def __init__(self, raw_data, tokenizer, max_len):
-        self.data = raw_data
+    def __init__(self, data, tokenizer, max_length=64):
+        self.data = data
         self.tokenizer = tokenizer
-        self.max_len = max_len
+        self.max_length = max_length
 
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, idx):
         item = self.data[idx]
-        
-        # TRỰC TIỆP: Đọc thẳng các giá trị đã được tiền xử lý từ CSV
         raw_nl = item['raw_nl']
-        template_nl = item['temp_nl']
-        template_code = item['temp_code']
+        raw_code = item['raw_code']
         
-        # Tokenize và padding
+        # Tiền xử lý
+        processed = preprocess_single_data(raw_nl, raw_code)
+        template_nl = processed['template_nl']
+        
+        # Tokenize
         raw_encodings = self.tokenizer(
             raw_nl, 
             truncation=True, 
             padding='max_length', 
-            max_length=self.max_len
+            max_length=self.max_length,
+            return_tensors='pt'
         )
+        
         temp_encodings = self.tokenizer(
             template_nl, 
             truncation=True, 
             padding='max_length', 
-            max_length=self.max_len
+            max_length=self.max_length,
+            return_tensors='pt'
         )
+        
         code_encodings = self.tokenizer(
-            template_code, 
+            raw_code, 
             truncation=True, 
             padding='max_length', 
-            max_length=self.max_len
+            max_length=self.max_length,
+            return_tensors='pt'
         )
         
         return {
-            'raw_input_ids': torch.tensor(raw_encodings['input_ids']),
-            'temp_input_ids': torch.tensor(temp_encodings['input_ids']),
-            'attention_mask': torch.tensor(raw_encodings['attention_mask']),
-            'labels': torch.tensor(code_encodings['input_ids'])
+            'raw_input_ids': raw_encodings['input_ids'].squeeze(),
+            'temp_input_ids': temp_encodings['input_ids'].squeeze(),
+            'attention_mask': raw_encodings['attention_mask'].squeeze(),
+            'labels': code_encodings['input_ids'].squeeze(),
+            'raw_nl': raw_nl,
+            'raw_code': raw_code
         }
 
 def main():
